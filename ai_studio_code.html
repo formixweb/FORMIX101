@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FORMIX // Future-Ready Digital Studio</title>
+    <meta name="description" content="FORMIX creates high-performance digital experiences and futuristic web solutions for modern brands.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #030305;
+            --bg-accent: #08080c;
+            --accent: #3B82F6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none !important; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- Custom Cursor --- */
+        #cursor-dot, #cursor-ring {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s var(--ease), height 0.3s var(--ease), background 0.3s var(--ease);
+        }
+        #cursor-dot { width: 6px; height: 6px; background: var(--accent); }
+        #cursor-ring { width: 35px; height: 34px; border: 1.5px solid var(--accent); opacity: 0.5; }
+
+        /* --- Loader --- */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.8s var(--ease);
+        }
+        .loader-bar {
+            width: 200px;
+            height: 2px;
+            background: var(--glass-border);
+            margin-top: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .loader-progress {
+            position: absolute;
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 1200px;
+            background: rgba(3, 3, 5, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 900;
+            transition: all 0.4s var(--ease);
+        }
+        .nav-scrolled { top: 10px; padding: 8px 24px; width: calc(100% - 20px); border-color: var(--accent); }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: -1px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-box { width: 24px; height: 24px; background: var(--accent); border-radius: 4px; rotate: 45deg; }
+
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+        .nav-links a:hover { color: var(--accent); }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 0 20px;
+            overflow: hidden;
+        }
+        #hero-canvas { position: absolute; inset: 0; z-index: 1; }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 900px;
+        }
+        .hero-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+        }
+        .status-dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            line-height: 1.05;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+        .blur-text span { display: inline-block; filter: blur(10px); opacity: 0; transform: translateY(20px); }
+
+        .hero-p { color: var(--text-dim); font-size: 1.2rem; max-width: 600px; margin: 0 auto 40px; }
+
+        /* --- Buttons --- */
+        .btn {
+            padding: 16px 32px;
+            border-radius: 100px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary { background: var(--accent); color: white; box-shadow: 0 10px 30px var(--accent-glow); }
+        .btn-secondary { background: var(--glass); color: white; border: 1px solid var(--glass-border); }
+        .btn:hover { transform: translateY(-3px) scale(1.02); }
+
+        /* --- Sections General --- */
+        section { padding: 140px 20px; max-width: 1300px; margin: 0 auto; }
+        .section-num { font-family: 'Space Grotesk'; color: var(--accent); font-size: 1rem; display: block; margin-bottom: 10px; }
+        .section-title { font-size: 3rem; margin-bottom: 60px; font-weight: 800; letter-spacing: -1px; }
+
+        /* --- Bento Grid (Services) --- */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .service-card {
+            background: var(--bg-accent);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            position: relative;
+            transition: 0.5s;
+        }
+        .service-card:hover { border-color: var(--accent); background: #0c0c14; }
+        .service-card h3 { font-size: 1.5rem; margin-bottom: 15px; font-family: 'Space Grotesk'; }
+        .service-card p { color: var(--text-dim); font-size: 0.95rem; }
+        .card-icon { font-size: 2rem; margin-bottom: 20px; color: var(--accent); display: block; }
+
+        /* --- Work Section --- */
+        .work-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+        .work-item {
+            position: relative;
+            border-radius: 32px;
+            overflow: hidden;
+            aspect-ratio: 16/10;
+            background: #111;
+        }
+        .work-img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.8s var(--ease);
+            filter: grayscale(0.4);
+        }
+        .work-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 40px; opacity: 0; transition: 0.4s;
+        }
+        .work-item:hover .work-overlay { opacity: 1; }
+        .work-item:hover .work-img { transform: scale(1.1); filter: grayscale(0); }
+
+        /* --- AI Chatbot --- */
+        #chatbot-trigger {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 60px; height: 60px; background: var(--accent);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            z-index: 999; box-shadow: 0 10px 30px var(--accent-glow);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        #chat-window {
+            position: fixed; bottom: 100px; right: 30px;
+            width: 350px; height: 450px; background: #0a0a0f;
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            z-index: 999; display: none; flex-direction: column;
+            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .chat-header { padding: 20px; background: var(--glass); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; }
+        .chat-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .chat-input { padding: 20px; border-top: 1px solid var(--glass-border); display: flex; gap: 10px; }
+        .chat-input input { background: var(--glass); border: 1px solid var(--glass-border); padding: 10px; border-radius: 10px; color: white; flex: 1; outline: none; }
+        
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 80%; font-size: 0.9rem; }
+        .msg-ai { background: var(--glass); align-self: flex-start; }
+        .msg-user { background: var(--accent); align-self: flex-end; }
+
+        /* --- Contact Form --- */
+        .contact-container {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+        }
+        .input-group { position: relative; margin-bottom: 30px; }
+        .input-group input, .input-group textarea {
+            width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--glass-border);
+            padding: 15px 0; color: white; outline: none; font-size: 1rem; transition: 0.3s;
+        }
+        .input-group label { position: absolute; left: 0; top: 15px; color: var(--text-dim); transition: 0.3s; pointer-events: none; }
+        .input-group input:focus ~ label, .input-group input:valid ~ label { top: -10px; font-size: 0.75rem; color: var(--accent); }
+        .input-group .bar { position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: var(--accent); transition: 0.4s; }
+        .input-group input:focus ~ .bar { width: 100%; }
+
+        /* --- Footer --- */
+        footer {
+            border-top: 1px solid var(--glass-border);
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .footer-links { display: flex; justify-content: center; gap: 40px; margin-bottom: 30px; }
+        .footer-links a { color: var(--text-dim); text-decoration: none; font-size: 0.9rem; }
+        .copy-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--accent); padding: 10px 20px; border-radius: 8px; opacity: 0; pointer-events: none; }
+
+        /* --- Scroll Progress --- */
+        #scroll-progress { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--accent); z-index: 1001; }
+
+        /* --- Responsive --- */
+        @media (max-width: 968px) {
+            .services-grid, .work-grid, .contact-container { grid-template-columns: 1fr; }
+            nav .nav-links { display: none; }
+            h1 { font-size: 3.5rem; }
+        }
+
+        /* --- Overdrive Mode (Easter Egg) --- */
+        body.overdrive { --accent: #ff0055; --bg: #0a0005; }
+    </style>
+</head>
+<body>
+
+    <div id="scroll-progress"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- Preloader -->
+    <div id="loader">
+        <div class="logo">
+            <div class="logo-box"></div>
+            FORMIX
+        </div>
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <a href="#" class="logo">
+            <div class="logo-box"></div>
+            FORMIX
+        </a>
+        <div class="nav-links">
+            <a href="#services">Services</a>
+            <a href="#work">Work</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <a href="#contact" class="btn btn-primary magnetic" style="padding: 10px 20px; font-size: 0.8rem;">Let's Talk</a>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <canvas id="hero-canvas"></canvas>
+        <div class="hero-content">
+            <div class="hero-status"><span class="status-dot"></span> Studio Status: Available 2026</div>
+            <h1 class="blur-text" id="hero-title">Experience the<br>Next Evolution.</h1>
+            <p class="hero-p">We engineer high-fidelity digital platforms that transform standard businesses into future-ready brands.</p>
+            <div style="display:flex; gap:20px; justify-content:center;">
+                <a href="#contact" class="btn btn-primary magnetic">Start Project</a>
+                <a href="#work" class="btn btn-secondary magnetic">View Gallery</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section id="services">
+        <span class="section-num">01 // Expertise</span>
+        <h2 class="section-title">Core Capabilities</h2>
+        <div class="services-grid">
+            <div class="service-card reveal-card">
+                <span class="card-icon">01</span>
+                <h3>Web Engineering</h3>
+                <p>High-performance development using the latest stack. Scalable, secure, and blazing fast.</p>
+            </div>
+            <div class="service-card reveal-card">
+                <span class="card-icon">02</span>
+                <h3>UI/UX Architecture</h3>
+                <p>Sophisticated interfaces designed for intuitive human interaction and conversion.</p>
+            </div>
+            <div class="service-card reveal-card">
+                <span class="card-icon">03</span>
+                <h3>3D Immersive</h3>
+                <p>Bringing depth to the web through custom WebGL and Three.js environments.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Work -->
+    <section id="work">
+        <span class="section-num">02 // Portfolio</span>
+        <h2 class="section-title">Selected Works</h2>
+        <div class="work-grid">
+            <div class="work-item reveal">
+                <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=1000" class="work-img" alt="Work 1">
+                <div class="work-overlay">
+                    <h3>Aura Nexus</h3>
+                    <p>Web Experience</p>
+                </div>
+            </div>
+            <div class="work-item reveal">
+                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&q=80&w=1000" class="work-img" alt="Work 2">
+                <div class="work-overlay">
+                    <h3>Velocis AI</h3>
+                    <p>E-Commerce Solution</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact">
+        <div class="contact-container">
+            <div>
+                <span class="section-num">03 // Collaboration</span>
+                <h2 class="section-title">Let's build<br>the future.</h2>
+                <p class="hero-p" style="margin:0;">Have an idea? Let's discuss how FORMIX can elevate your digital presence.</p>
+            </div>
+            <form id="contact-form">
+                <div class="input-group">
+                    <input type="text" required>
+                    <label>Full Name</label>
+                    <div class="bar"></div>
+                </div>
+                <div class="input-group">
+                    <input type="email" required>
+                    <label>Email Address</label>
+                    <div class="bar"></div>
+                </div>
+                <div class="input-group">
+                    <textarea rows="4" required></textarea>
+                    <label>Project Details</label>
+                    <div class="bar"></div>
+                </div>
+                <button type="submit" class="btn btn-primary magnetic">Send Inquiry</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="logo" style="justify-content:center; margin-bottom: 40px;">
+            <div class="logo-box"></div>
+            FORMIX
+        </div>
+        <div class="footer-links">
+            <a href="https://wa.me/923317058112" class="magnetic">WhatsApp</a>
+            <a href="https://www.tiktok.com/@formixstudio" class="magnetic">TikTok</a>
+            <a href="#" class="magnetic" id="copy-email">Email</a>
+        </div>
+        <p style="color: var(--text-dim); font-size: 0.8rem;">&copy; 2026 FORMIX STUDIO. Engineered for Excellence.</p>
+    </footer>
+
+    <!-- AI Chatbot -->
+    <div id="chatbot-trigger" class="magnetic">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div id="chat-window">
+        <div class="chat-header">
+            <span>Zoe // AI Assistant</span>
+            <span id="chat-close" style="cursor:pointer">&times;</span>
+        </div>
+        <div class="chat-body" id="chat-content">
+            <div class="msg msg-ai">Hello! I'm Zoe. How can I help you with your project today?</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chat-input-field" placeholder="Ask something...">
+            <button id="chat-send" style="background:none; border:none; color:var(--accent); font-weight:bold;">Send</button>
+        </div>
+    </div>
+
+    <div class="copy-toast" id="toast">Email Copied!</div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        // --- Custom Cursor Logic ---
+        const dot = document.getElementById('cursor-dot');
+        const ring = document.getElementById('cursor-ring');
+        let mouseX = 0, mouseY = 0;
+        let ringX = 0, ringY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            dot.style.left = `${mouseX}px`;
+            dot.style.top = `${mouseY}px`;
+        });
+
+        function animateCursor() {
+            ringX += (mouseX - ringX) * 0.15;
+            ringY += (mouseY - ringY) * 0.15;
+            ring.style.left = `${ringX}px`;
+            ring.style.top = `${ringY}px`;
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Cursor States
+        document.querySelectorAll('a, button, .magnetic').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                ring.style.width = '60px';
+                ring.style.height = '60px';
+                ring.style.background = 'rgba(59, 130, 246, 0.1)';
+            });
+            el.addEventListener('mouseleave', () => {
+                ring.style.width = '35px';
+                ring.style.height = '34px';
+                ring.style.background = 'none';
+            });
+        });
+
+        // --- Loader & Entrance ---
+        window.addEventListener('load', () => {
+            const tl = gsap.timeline();
+            tl.to(".loader-progress", { width: "100%", duration: 1.5, ease: "power2.inOut" })
+              .to("#loader", { y: "-100%", duration: 1, ease: "expo.inOut" })
+              .from(".logo", { opacity: 0, x: -20, duration: 0.8 }, "-=0.5")
+              .from(".nav-links a", { opacity: 0, y: -10, stagger: 0.1 }, "-=0.8")
+              .to("#hero-title span", { opacity: 1, filter: "blur(0px)", y: 0, stagger: 0.05, duration: 1 }, "-=0.5");
+        });
+
+        // Split text for hero animation
+        const heroTitle = document.getElementById('hero-title');
+        const text = heroTitle.innerHTML;
+        heroTitle.innerHTML = text.split('').map(char => 
+            char === '<' ? '<br>' : `<span>${char === ' ' ? '&nbsp;' : char}</span>`
+        ).join('').replace(/<span><br><\/span>/g, '<br>');
+
+        // --- Three.js Neural Background ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('hero-canvas'), alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const geometry = new THREE.IcosahedronGeometry(2, 1);
+        const material = new THREE.MeshBasicMaterial({ color: 0x3B82F6, wireframe: true, transparent: true, opacity: 0.2 });
+        const core = new THREE.Mesh(geometry, material);
+        scene.add(core);
+
+        const particles = new THREE.BufferGeometry();
+        const pCount = 1000;
+        const pPositions = new Float32Array(pCount * 3);
+        for(let i=0; i<pCount*3; i++) pPositions[i] = (Math.random() - 0.5) * 10;
+        particles.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+        const pMaterial = new THREE.PointsMaterial({ color: 0x3B82F6, size: 0.02 });
+        const pMesh = new THREE.Points(particles, pMaterial);
+        scene.add(pMesh);
+
+        camera.position.z = 5;
+
+        function animateScene() {
+            requestAnimationFrame(animateScene);
+            core.rotation.y += 0.002;
+            core.rotation.x += 0.001;
+            pMesh.rotation.y += 0.0005;
+            renderer.render(scene, camera);
+        }
+        animateScene();
+
+        // Parallax Core
+        window.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 2;
+            const y = (e.clientY / window.innerHeight - 0.5) * 2;
+            gsap.to(core.rotation, { x: y * 0.5, y: x * 0.5, duration: 1 });
+        });
+
+        // --- GSAP Scroll Animations ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            gsap.from(el, {
+                scrollTrigger: { trigger: el, start: "top 85%" },
+                opacity: 0, y: 50, duration: 1, ease: "power3.out"
+            });
+        });
+
+        document.querySelectorAll('.reveal-card').forEach((el, i) => {
+            gsap.from(el, {
+                scrollTrigger: { trigger: el, start: "top 90%" },
+                opacity: 0, scale: 0.9, y: 30, duration: 0.8, delay: i * 0.1
+            });
+        });
+
+        // Scroll Progress
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("scroll-progress").style.width = scrolled + "%";
+            
+            if(winScroll > 100) document.getElementById('navbar').classList.add('nav-scrolled');
+            else document.getElementById('navbar').classList.remove('nav-scrolled');
+        });
+
+        // --- Magnetic Buttons ---
+        document.querySelectorAll('.magnetic').forEach(btn => {
+            btn.addEventListener('mousemove', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                gsap.to(this, { x: x * 0.3, y: y * 0.3, duration: 0.5 });
+            });
+            btn.addEventListener('mouseleave', function() {
+                gsap.to(this, { x: 0, y: 0, duration: 0.5 });
+            });
+        });
+
+        // --- Chatbot Demo ---
+        const chatTrigger = document.getElementById('chatbot-trigger');
+        const chatWindow = document.getElementById('chat-window');
+        const chatClose = document.getElementById('chat-close');
+        const chatInput = document.getElementById('chat-input-field');
+        const chatSend = document.getElementById('chat-send');
+        const chatContent = document.getElementById('chat-content');
+
+        chatTrigger.onclick = () => chatWindow.style.display = 'flex';
+        chatClose.onclick = () => chatWindow.style.display = 'none';
+
+        function sendMsg() {
+            if(!chatInput.value) return;
+            const userMsg = document.createElement('div');
+            userMsg.className = 'msg msg-user';
+            userMsg.textContent = chatInput.value;
+            chatContent.appendChild(userMsg);
+            
+            const val = chatInput.value.toLowerCase();
+            chatInput.value = '';
+
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'msg msg-ai';
+                if(val.includes('price')) aiMsg.textContent = "Every project is custom. Usually, our futuristic experiences start at $5k.";
+                else if(val.includes('hello')) aiMsg.textContent = "Hi there! Ready to evolve your brand?";
+                else aiMsg.textContent = "That sounds interesting! You should definitely book a call with our founders.";
+                chatContent.appendChild(aiMsg);
+                chatContent.scrollTop = chatContent.scrollHeight;
+            }, 1000);
+        }
+
+        chatSend.onclick = sendMsg;
+        chatInput.onkeypress = (e) => { if(e.key === 'Enter') sendMsg(); };
+
+        // --- Easter Egg ---
+        let keys = "";
+        window.addEventListener('keydown', (e) => {
+            keys += e.key.toLowerCase();
+            if(keys.includes("formix")) {
+                document.body.classList.toggle('overdrive');
+                keys = "";
+            }
+            if(keys.length > 10) keys = keys.substring(1);
+        });
+
+        // --- Copy Email Interaction ---
+        document.getElementById('copy-email').onclick = (e) => {
+            e.preventDefault();
+            navigator.clipboard.writeText("hello@formix.studio");
+            const toast = document.getElementById('toast');
+            gsap.to(toast, { opacity: 1, bottom: 40, duration: 0.4 });
+            setTimeout(() => gsap.to(toast, { opacity: 0, bottom: 20, duration: 0.4 }), 2000);
+        };
+
+    </script>
+</body>
+</html>
